@@ -1,21 +1,38 @@
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 pipeline {
 
 	agent none
-
-	options {
-		buildDiscarder logRotator( daysToKeepStr: '8', numToKeepStr: '5') 
-	}
-
 	environment {
 	    MyKeyID="myCustomValue1"
 	}
 	
 	stages {
+	
+stage("stage master") {
+		steps {
+    			script {
+					stage("inner stage 1") {
+						script {
+							node {
+								println "inner stage"
+							}
+						}
+					}
+					stage("inner stage 2") {
+						script {
+							node {
+								println "inner stage"
+							}		
+						}
+					}
+                    }
+				}
+		}
 
 	stage('Descargar codigo fuente') {
-		when {
-			branch "master"
-		}
+	    environment {
+    	    MyKeyID="myCustomValue2x"
+    	}
     	steps {
     		script {
           		node {
@@ -29,10 +46,37 @@ pipeline {
     	steps {
     		script {
           		node {
-        				println "\nMi segundo stage esta en ejecucion. KeyID: $MyKeyID\n"
+        			println "Mi segundo stage esta en ejecucion. KeyID: $MyKeyID"
+          		}
+        	}
+    	}
+	}
+	
+	stage('input Test') {
+    	steps {
+    		script {
+    		    try {
+    		        input (message: " esta seguro?")
+    		    }
+    		    catch(exc){
+    		    }
+    		    finally {
+          	        node {
+        			    println "iniciando deploy"
+          		    }
+    		       }
+    		    }
+    		    }
+    }
+
+	stage('Fin') {
+    	steps {
+    		script {
+          		node {
+        			println "Mi segundo stage esta en ejecucion. KeyID: $MyKeyID"
           		}
         	}
     	}
 	}
 }
-}
+}	    
